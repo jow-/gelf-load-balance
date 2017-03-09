@@ -30,3 +30,8 @@ add_executable(gelf-load-balance ${SOURCE_CODE})
 target_link_libraries(gelf-load-balance
   ${LINK_LIBRARIES}
 )
+
+install(
+  TARGETS gelf-load-balance
+  RUNTIME DESTINATION bin
+)

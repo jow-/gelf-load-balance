@@ -11,7 +11,7 @@ Protocol::Protocol(
 }
 
 void Protocol::enStack(SharedBuffer shared_buffer) {
-  std::cout << "Protocol::enStack" << std::endl;
+  // std::cout << "Protocol::enStack" << std::endl;
   SharedBuffer_ sb = shared_buffer.buff;
   if (sb && sb->size() > 11) {
     std::string id = __getId(sb);
@@ -19,10 +19,10 @@ void Protocol::enStack(SharedBuffer shared_buffer) {
       return ;
     }
 
-    std::cout << "Protocol::enStack id " << id << std::endl;
+    // std::cout << "Protocol::enStack id " << id << std::endl;
     ChunkedMap::const_iterator it = chunked_map_.find(id);
     if (it != chunked_map_.end()) {
-      std::cout << "Protocol::enStack find cm " << std::endl;
+      // std::cout << "Protocol::enStack find cm " << std::endl;
       SharedChunkedMessage cm = (*it).second;
       size_t index = __getIndex(sb);
       cm->enStack(index, shared_buffer);
@@ -31,22 +31,22 @@ void Protocol::enStack(SharedBuffer shared_buffer) {
         chunked_map_.erase(it);
       }
     } else {
-      std::cout << "Protocol::enStack not find cm " << std::endl;
+      // std::cout << "Protocol::enStack not find cm " << std::endl;
       size_t index = __getIndex(sb);
       size_t total = __getTotal(sb);
-      std::cout << "Protocol::enStack index " << index << std::endl;
-      std::cout << "Protocol::enStack total " << total << std::endl;
+      // std::cout << "Protocol::enStack index " << index << std::endl;
+      // std::cout << "Protocol::enStack total " << total << std::endl;
       SharedChunkedMessage cm(new ChunkedMessage(io_, *this, id, total));
 
-      std::cout << "Protocol::enStack crete cm"  << std::endl;
+      // std::cout << "Protocol::enStack crete cm"  << std::endl;
       cm->enStack(index, shared_buffer);
-      std::cout << "Protocol::enStack cm->enStack over"  << std::endl;
+      // std::cout << "Protocol::enStack cm->enStack over"  << std::endl;
       if (cm->isFinish()) {
         callback_(cm->getMessage());
       } else {
         chunked_map_.insert(std::make_pair(id, cm));
       }
-      std::cout << "Protocol::enStack finish "  << std::endl;
+      // std::cout << "Protocol::enStack finish "  << std::endl;
     }
   }
 }

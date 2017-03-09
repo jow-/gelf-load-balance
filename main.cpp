@@ -39,7 +39,7 @@ namespace UdpAsyService
         void hand_chunk(BufferStack buffer_stack) 
         {
             // TODO 
-            std::cout << "hand_chunk: " << buffer_stack.size() << std::endl;
+            // std::cout << "hand_chunk: " << buffer_stack.size() << std::endl;
             udp::endpoint &up_endpoint = upstream_.get();
             std::for_each(buffer_stack.begin(), buffer_stack.end(),[&](SharedBuffer& sb){
                 socket_.async_send_to(boost::asio::buffer(*(sb.buff), sb.size), up_endpoint,  

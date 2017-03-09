@@ -22,17 +22,17 @@ ChunkedMessage::ChunkedMessage(
 
 
 void ChunkedMessage::enStack(size_t i, SharedBuffer sb) {
-  std::cout << "ChunkedMessage::enStack" << std::endl;
+  // std::cout << "ChunkedMessage::enStack" << std::endl;
   buffer_stack_[i] = sb;
   flag_[i] = 1;
   last_ = time(NULL);
   timer_.cancel();
-  std::cout << "ChunkedMessage::enStack timer_.cancel();" << std::endl;
+  // std::cout << "ChunkedMessage::enStack timer_.cancel();" << std::endl;
   timer_.async_wait(boost::bind(
       &ChunkedMessage::timeout,
       shared_from_this(),
       _1));
-  std::cout << "ChunkedMessage::enStack timer_.async_wait();" << std::endl;
+  // std::cout << "ChunkedMessage::enStack timer_.async_wait();" << std::endl;
 
 }
 

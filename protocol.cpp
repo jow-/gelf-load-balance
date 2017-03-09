@@ -1,6 +1,5 @@
 #include "protocol.hpp"
 
-
 Protocol::Protocol(
   boost::asio::io_service& io, 
   DeStackCallback callback): 

@@ -27,18 +27,19 @@ public:
     }
 
     udp::endpoint& get() {
-        seed_ = random(seed_, weight_total_);
+        int rnd = random(weight_total_);
 
         for(int i=0; i<boundry_.size(); i++) {
-            if (seed_ < boundry_[i]) {
+            if (rnd < boundry_[i]) {
                 return upstreams_[i];
             }
         }
         assert(false);
     }
 
-    int random(int seed, int mod) {
-        return (seed * 7 + 11)%mod;
+    int random(int mod) {
+        seed_ = (seed_ * 123 + 59)%65535;
+        return seed_%mod;
     }
 
 private: 

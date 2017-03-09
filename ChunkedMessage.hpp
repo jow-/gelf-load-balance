@@ -16,32 +16,38 @@
 class Protocol;
 
 class ChunkedMessage :
-  public std::enable_shared_from_this<ChunkedMessage> {
+    public std::enable_shared_from_this<ChunkedMessage> {
 public:
-  ChunkedMessage(
-    boost::asio::io_service& io,
-    Protocol& protocol,
-    std::string id,
-    size_t total);
+    ChunkedMessage(
+        boost::asio::io_service& io,
+        Protocol& protocol,
+        std::string id,
+        size_t total);
 
-  void enStack(size_t i, SharedBuffer sb);
+    ~ChunkedMessage();
 
-  bool isFinish();
+    void enStack(size_t i, SharedBuffer sb);
 
-  BufferStack getMessage() {
+    bool isFinish();
+
+    BufferStack getMessage() {
     return buffer_stack_;
-  }
+    }
 
-  void timeout(const boost::system::error_code& error_code);
+    std::string id() {
+      return id_;
+    }
+
+    void timeout(const boost::system::error_code& error_code);
 private:
-  boost::asio::io_service&    io_;
-  Protocol&                   protocol_;
-  std::string                 id_;
-  boost::asio::deadline_timer timer_;
-  std::vector<int>            flag_;
-  BufferStack                 buffer_stack_;
-  size_t                      total_;
-  time_t                      last_;
+    boost::asio::io_service&    io_;
+    Protocol&                   protocol_;
+    std::string                 id_;
+    boost::asio::deadline_timer timer_;
+    std::vector<int>            flag_;
+    BufferStack                 buffer_stack_;
+    size_t                      total_;
+    time_t                      last_;
 };
 
 

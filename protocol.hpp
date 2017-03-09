@@ -30,26 +30,26 @@ typedef std::shared_ptr<ChunkedMessage> SharedChunkedMessage;
 class Protocol {
 public:
 
-  Protocol(
-    boost::asio::io_service& io, 
-    DeStackCallback callback);
+    Protocol(
+        boost::asio::io_service& io,
+        DeStackCallback callback);
 
-  void enStack(SharedBuffer sb);
+    void enStack(SharedBuffer sb);
 
-  void remove(std::string id);
+    void remove(std::string id);
 
-  size_t __getIndex(SharedBuffer_ sb);
+    size_t __getIndex(SharedBufferInner sb);
 
-  size_t __getTotal(SharedBuffer_ sb);
+    size_t __getTotal(SharedBufferInner sb);
 
-  std::string __getId(SharedBuffer_ sb);
+    std::string __getId(SharedBufferInner sb);
 
-  typedef std::unordered_map<std::string, SharedChunkedMessage> ChunkedMap;
+    typedef std::unordered_map<std::string, SharedChunkedMessage> ChunkedMap;
 
 private:
-  boost::asio::io_service&    io_;
-  ChunkedMap                  chunked_map_;
-  DeStackCallback             callback_;
+    boost::asio::io_service&    io_;
+    ChunkedMap                  chunked_map_;
+    DeStackCallback             callback_;
 };
 
 

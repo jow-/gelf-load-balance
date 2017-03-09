@@ -23,7 +23,7 @@ SET(SOURCE_CODE
   ChunkedMessage.cpp
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -O3")
 
 add_executable(gelf-load-balance ${SOURCE_CODE})
 

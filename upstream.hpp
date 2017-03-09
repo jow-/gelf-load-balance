@@ -12,40 +12,40 @@ using namespace boost::property_tree;
 
 class Upstream {
 public:
-  Upstream(ptree& upstreams): weight_total_(0), seed_(1) {
-   
-    BOOST_FOREACH(ptree::value_type &vt, upstreams) {
-      std::string host = vt.second.get_child("host").get_value<std::string>();
-      int port = vt.second.get_child("port").get_value<int>();
-      int weight = vt.second.get_child("weight").get_value<int>();
+    Upstream(ptree& upstreams): weight_total_(0), seed_(1) {
 
-      udp::endpoint endpoint(address_v4::from_string(host), port);
-      upstreams_.push_back(endpoint);
-      weight_total_ += weight;
-      boundry_.push_back(weight_total_);
+        BOOST_FOREACH(ptree::value_type &vt, upstreams) {
+            std::string host = vt.second.get_child("host").get_value<std::string>();
+            int port = vt.second.get_child("port").get_value<int>();
+            int weight = vt.second.get_child("weight").get_value<int>();
+
+            udp::endpoint endpoint(address_v4::from_string(host), port);
+            upstreams_.push_back(endpoint);
+            weight_total_ += weight;
+            boundry_.push_back(weight_total_);
+        }
     }
-  }
 
-  udp::endpoint& get() {
-    seed_ = random(seed_, weight_total_);
+    udp::endpoint& get() {
+        seed_ = random(seed_, weight_total_);
 
-    for(int i=0; i<boundry_.size(); i++) {
-      if (seed_ < boundry_[i]) {
-        return upstreams_[i];
-      }
+        for(int i=0; i<boundry_.size(); i++) {
+            if (seed_ < boundry_[i]) {
+                return upstreams_[i];
+            }
+        }
+        assert(false);
     }
-    assert(false);
-  }
 
-  int random(int seed, int mod) {
-    return (seed * 7 + 11)%mod;
-  }
+    int random(int seed, int mod) {
+        return (seed * 7 + 11)%mod;
+    }
 
 private: 
-  std::vector<int> boundry_;
-  std::vector<udp::endpoint> upstreams_;
-  int weight_total_;
-  int seed_;
+    std::vector<int> boundry_;
+    std::vector<udp::endpoint> upstreams_;
+    int weight_total_;
+    int seed_;
 };
 
 

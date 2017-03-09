@@ -7,6 +7,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
+#include "define.h"
 #include "protocol.hpp"
 #include "upstream.hpp"
 
@@ -23,7 +24,7 @@ namespace UdpAsyService
             udp::endpoint endpoint,
             ptree& upstreams)  
             :socket_(io, endpoint),
-             protocol_(boost::bind(&udp_server::hand_chunk, this, _1)),
+             protocol_(io, boost::bind(&udp_server::hand_chunk, this, _1)),
              upstream_(upstreams)
         {
             start_recive();  
@@ -39,6 +40,13 @@ namespace UdpAsyService
         {
             // TODO 
             std::cout << "hand_chunk: " << buffer_stack.size() << std::endl;
+            udp::endpoint &up_endpoint = upstream_.get();
+            std::for_each(buffer_stack.begin(), buffer_stack.end(),[&](SharedBuffer& sb){
+                socket_.async_send_to(boost::asio::buffer(*(sb.buff), sb.size), up_endpoint,  
+                        boost::bind(&udp_server::hand_send, this, sb.buff, sb.size, boost::asio::placeholders::error,  
+                            boost::asio::placeholders::bytes_transferred));
+            });
+
         }
   
     private:  
@@ -46,7 +54,7 @@ namespace UdpAsyService
         {  
             if (!error || error != boost::asio::error::message_size)  
             {
-                SharedBuffer copy = SharedBuffer(new Buffer());
+                SharedBufferInner copy = SharedBufferInner(new Buffer());
                 boost::swap(rec_buf_, *copy);
                 if ((*copy)[0] == 0x78 || (*copy)[0] == 0x1f) {
                     udp::endpoint &up_endpoint = upstream_.get();
@@ -54,13 +62,16 @@ namespace UdpAsyService
                         boost::bind(&udp_server::hand_send, this, copy, size, boost::asio::placeholders::error,  
                             boost::asio::placeholders::bytes_transferred));  
                 } else if ((*copy)[0] == 0x1e) {
-                    protocol_.enStack(copy);
+                    SharedBuffer sb;
+                    sb.size = size;
+                    sb.buff = copy;
+                    protocol_.enStack(sb);
                 }
                 start_recive();//next client;  
             }  
         }
 
-        void hand_send(SharedBuffer buff, size_t buff_len, const boost::system::system_error& error, std::size_t size)  
+        void hand_send(SharedBufferInner buff, size_t buff_len, const boost::system::system_error& error, std::size_t size)
         {  
             std::cout << "send byte: " << buff_len << std::endl;
         }  
@@ -77,17 +88,17 @@ namespace UdpAsyService
             udp::endpoint endpoint,
             ptree& upstreams)  
     {  
-        try  
-        {  
+        try
+        {
             boost::asio::io_service io;  
             udp_server server(io, endpoint, upstreams);  
   
             io.run();  
-        }  
-        catch (std::exception& e)  
-        {  
-            std::cerr << e.what() << std::endl;  
-        }  
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
     }  
 }
 

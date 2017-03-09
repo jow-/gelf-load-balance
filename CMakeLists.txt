@@ -17,9 +17,15 @@ SET(LINK_LIBRARIES
   boost_system
 )
 
+SET(SOURCE_CODE
+  main.cpp
+  protocol.cpp
+  ChunkedMessage.cpp
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -g")
 
-add_executable(gelf-load-balance main.cpp)
+add_executable(gelf-load-balance ${SOURCE_CODE})
 
 target_link_libraries(gelf-load-balance
   ${LINK_LIBRARIES}

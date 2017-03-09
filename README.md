@@ -31,6 +31,10 @@ make install
 
 运行
 ```
+gelf-load-balance -f pathto/gelf-load-balance.json
+```
+or
+```
 cd pathto/gelf-load-balance
 gelf-load-balance-server.sh start
 #gelf-load-balance-server.sh restart

@@ -37,7 +37,7 @@ namespace UdpAsyService
                 boost::bind(&udp_server::hand_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));  
         }
 
-        void hand_chunk(BufferStack buffer_stack) 
+        void hand_chunk(BufferStack& buffer_stack) 
         {
             udp::endpoint &up_endpoint = upstream_.get();
             std::for_each(buffer_stack.begin(), buffer_stack.end(),[&](SharedBuffer& sb){

@@ -7,11 +7,16 @@ gelf 协议 UDP负载均衡
 依赖 boost 1.46.0 以上
 cmake 2.8 以上
 
-
+Mac
 ```
 brew install boost
 brew install cmake
+```
 
+CentOS
+```
+yum install boost-devel
+yum install cmake
 ```
 
 编译
@@ -20,12 +25,16 @@ mkdir build
 cd build
 cmake ../
 make
+make install
 
 ```
 
 运行
 ```
-./gelf-load-balance -f pathto/gelf-load-balance.json
+cd pathto/gelf-load-balance
+gelf-load-balance-server.sh start
+#gelf-load-balance-server.sh restart
+
 ```
 
 目前支持 gelf UDP格式协议的分发

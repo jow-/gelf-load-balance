@@ -25,15 +25,11 @@ start() {
         touch $PIDFILE
     fi
 
-    if [ -e $JAR ];
-    then
-        echo "starting server."
-        nohup $SERVER_NAME >/dev/null 2>&1 &
-        echo $! > $PIDFILE
-    else
-        echo "Can't find the executable jar file."
-        exit 1
-    fi
+
+    echo "starting server."
+    nohup $SERVER_NAME >/dev/null 2>&1 &
+    echo $! > $PIDFILE
+
 }
 
 stop(){

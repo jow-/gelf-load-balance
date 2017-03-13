@@ -5,11 +5,12 @@ ChunkedMessage::ChunkedMessage(
     boost::asio::io_service& io,
     Protocol& protocol,
     std::string id,
-    size_t total):
+    size_t total,
+    size_t chunk_timeout):
         io_(io),
         protocol_(protocol),
         id_(id),
-        timer_(io, boost::posix_time::seconds(CHUNKED_TIMEOUT)),
+        timer_(io, boost::posix_time::seconds(chunk_timeout)),
         total_(total)
 {
     buffer_stack_.resize(total);
@@ -46,4 +47,10 @@ void ChunkedMessage::timeout(const boost::system::error_code& error_code) {
     if (!error_code) {
         protocol_.remove(id_);
     }
+}
+
+
+BufferStack ChunkedMessage::getAndRemoveMessage() {
+    timer_.cancel();
+    return buffer_stack_;
 }

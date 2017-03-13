@@ -22,7 +22,8 @@ public:
         boost::asio::io_service& io,
         Protocol& protocol,
         std::string id,
-        size_t total);
+        size_t total,
+        size_t chunk_timeout);
 
     ~ChunkedMessage();
 
@@ -30,9 +31,7 @@ public:
 
     bool isFinish();
 
-    BufferStack getMessage() {
-    return buffer_stack_;
-    }
+    BufferStack getAndRemoveMessage();
 
     std::string id() {
       return id_;

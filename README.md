@@ -43,7 +43,25 @@ gelf-load-balance-server.sh start
 
 目前支持 gelf UDP格式协议的分发
 
-TODO: Chunked Message
+```
+{
+    "host": "127.0.0.1",
+    "port": 12200,
+    "upstream": [
+        {
+            "host": "127.0.0.1",
+            "port": 12201,
+            "weight": 100
+        },
+        {
+            "host": "127.0.0.1",
+            "port": 12202,
+            "weight": 100
+        }
+    ]
+}
+
+```
 
 
 gelf UDP 协议格式

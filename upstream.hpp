@@ -12,7 +12,8 @@ using namespace boost::property_tree;
 
 class Upstream {
 public:
-    Upstream(ptree& upstreams): weight_total_(0), seed_(1) {
+    Upstream(ptree& config): weight_total_(0), seed_(1) {
+        ptree upstreams = config.get_child("upstream");
 
         BOOST_FOREACH(ptree::value_type &vt, upstreams) {
             std::string host = vt.second.get_child("host").get_value<std::string>();

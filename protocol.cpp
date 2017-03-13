@@ -2,11 +2,15 @@
 
 Protocol::Protocol(
   boost::asio::io_service& io, 
-  DeStackCallback callback): 
+  DeStackCallback callback,
+  ptree& config): 
     io_(io),
     callback_(callback) 
 {
-
+    chunk_timeout_ = config.get_child("chunked_timeout").get_value<int>();
+    if (chunk_timeout_ <= 0) {
+        chunk_timeout_ = DEFAULT_CHUNKED_TIMEOUT;
+    }
 }
 
 void Protocol::enStack(SharedBuffer shared_buffer) {
@@ -23,17 +27,18 @@ void Protocol::enStack(SharedBuffer shared_buffer) {
             size_t index = __getIndex(sb);
             cm->enStack(index, shared_buffer);
             if (cm->isFinish()) {
-                callback_(cm->getMessage());
+                callback_(cm->getAndRemoveMessage());
                 remove(id);
             }
         } else {
             size_t index = __getIndex(sb);
             size_t total = __getTotal(sb);
-            SharedChunkedMessage cm(new ChunkedMessage(io_, *this, id, total));
+            SharedChunkedMessage cm(
+                new ChunkedMessage(io_, *this, id, total, DEFAULT_CHUNKED_TIMEOUT));
 
             cm->enStack(index, shared_buffer);
             if (cm->isFinish()) {
-                callback_(cm->getMessage());
+                callback_(cm->getAndRemoveMessage());
                 remove(id);
             } else {
                 chunked_map_.insert(std::make_pair(id, cm));

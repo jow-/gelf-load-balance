@@ -11,11 +11,12 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 #include "define.h"
 #include "ChunkedMessage.hpp"
 
-
+using namespace boost::property_tree; 
 
 // chunked message
 // 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16
@@ -32,7 +33,8 @@ public:
 
     Protocol(
         boost::asio::io_service& io,
-        DeStackCallback callback);
+        DeStackCallback callback,
+        ptree& config);
 
     void enStack(SharedBuffer sb);
 
@@ -50,6 +52,7 @@ private:
     boost::asio::io_service&    io_;
     ChunkedMap                  chunked_map_;
     DeStackCallback             callback_;
+    size_t                      chunk_timeout_;
 };
 
 

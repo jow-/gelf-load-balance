@@ -2,7 +2,7 @@
 #define __GELF_LOAD_BALANCE_DEFINE_H__
 
 #define MAX_SIZE 1500
-#define CHUNKED_TIMEOUT 5
+#define DEFAULT_CHUNKED_TIMEOUT 5
 
 typedef boost::array<char, MAX_SIZE> Buffer;
 

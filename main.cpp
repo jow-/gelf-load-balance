@@ -23,10 +23,10 @@ namespace UdpAsyService
         udp_server(
             boost::asio::io_service& io,
             udp::endpoint endpoint,
-            ptree& upstreams)  
+            ptree& config)  
             :socket_(io, endpoint),
-             protocol_(io, boost::bind(&udp_server::hand_chunk, this, _1)),
-             upstream_(upstreams)
+             protocol_(io, boost::bind(&udp_server::hand_chunk, this, _1), config),
+             upstream_(config)
         {
             start_recive();  
         }
@@ -85,12 +85,12 @@ namespace UdpAsyService
   
     void udp_asy_server(
             udp::endpoint endpoint,
-            ptree& upstreams)  
+            ptree& config)  
     {  
         try
         {
             boost::asio::io_service io;  
-            udp_server server(io, endpoint, upstreams);  
+            udp_server server(io, endpoint, config);  
   
             io.run();  
         }
@@ -111,18 +111,16 @@ int main(int argc, char* argv[])
         }
     }
     std::cout << filename << std::endl;
-    ptree pt;
-    read_json(filename, pt);
+    ptree config;
+    read_json(filename, config);
 
     std::vector<udp::endpoint> endpoints;
 
-    ptree upstream = pt.get_child("upstream");
-
-    std::string host = pt.get_child("host").get_value<std::string>();
-    int port = pt.get_child("port").get_value<int>();
+    std::string host = config.get_child("host").get_value<std::string>();
+    int port = config.get_child("port").get_value<int>();
 
     udp::endpoint endpoint(address_v4::from_string(host), port);
 
-    UdpAsyService::udp_asy_server(endpoint, upstream);
+    UdpAsyService::udp_asy_server(endpoint, config);
     return 0;
 }

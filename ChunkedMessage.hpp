@@ -31,7 +31,7 @@ public:
 
     bool isFinish();
 
-    BufferStack getAndRemoveMessage();
+    BufferStack getMessageAndRemoveTimer();
 
     std::string id() {
       return id_;

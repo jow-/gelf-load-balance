@@ -66,8 +66,8 @@ namespace UdpAsyService
                     sb.buff = copy;
                     protocol_.enStack(sb);
                 }
-                start_recive();//next client;  
-            }  
+            }
+            start_recive();//next client;
         }
 
         void hand_send(SharedBufferInner buff, size_t buff_len, const boost::system::system_error& error, std::size_t size)

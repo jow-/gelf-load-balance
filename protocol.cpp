@@ -27,19 +27,18 @@ void Protocol::enStack(SharedBuffer shared_buffer) {
             size_t index = __getIndex(sb);
             cm->enStack(index, shared_buffer);
             if (cm->isFinish()) {
-                callback_(cm->getAndRemoveMessage());
+                callback_(cm->getMessageAndRemoveTimer());
                 remove(id);
             }
         } else {
             size_t index = __getIndex(sb);
             size_t total = __getTotal(sb);
             SharedChunkedMessage cm(
-                new ChunkedMessage(io_, *this, id, total, DEFAULT_CHUNKED_TIMEOUT));
+                new ChunkedMessage(io_, *this, id, total, chunk_timeout_));
 
             cm->enStack(index, shared_buffer);
             if (cm->isFinish()) {
-                callback_(cm->getAndRemoveMessage());
-                remove(id);
+                callback_(cm->getMessageAndRemoveTimer());
             } else {
                 chunked_map_.insert(std::make_pair(id, cm));
             }

@@ -47,6 +47,7 @@ gelf-load-balance-server.sh start
 {
     "host": "127.0.0.1",
     "port": 12200,
+    "chunked_timeout": 5,
     "upstream": [
         {
             "host": "127.0.0.1",

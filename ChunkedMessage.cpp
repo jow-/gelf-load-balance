@@ -26,6 +26,8 @@ ChunkedMessage::~ChunkedMessage() {
 
 
 void ChunkedMessage::enStack(size_t i, SharedBuffer sb) {
+    if (i>=total_)
+        return;
 
     buffer_stack_[i] = sb;
     flag_[i] = 1;
@@ -50,7 +52,7 @@ void ChunkedMessage::timeout(const boost::system::error_code& error_code) {
 }
 
 
-BufferStack ChunkedMessage::getAndRemoveMessage() {
+BufferStack ChunkedMessage::getMessageAndRemoveTimer() {
     timer_.cancel();
     return buffer_stack_;
 }

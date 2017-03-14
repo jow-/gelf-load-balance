@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -40,6 +41,8 @@ public:
 
     void remove(std::string id);
 
+    void __remove(std::string id);
+
     size_t __getIndex(SharedBufferInner sb);
 
     size_t __getTotal(SharedBufferInner sb);
@@ -50,6 +53,7 @@ public:
 
 private:
     boost::asio::io_service&    io_;
+    mutable std::mutex          mutex_;
     ChunkedMap                  chunked_map_;
     DeStackCallback             callback_;
     size_t                      chunk_timeout_;

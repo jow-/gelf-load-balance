@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <vector>
+#include <mutex>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/asio.hpp>
 #include <boost/foreach.hpp>
+
 
 using namespace boost::asio::ip;
 using namespace boost::property_tree; 
@@ -28,6 +30,7 @@ public:
     }
 
     udp::endpoint& get() {
+        std::lock_guard<std::mutex> guard(mutex_);
         int rnd = random(weight_total_);
 
         for(int i=0; i<boundry_.size(); i++) {
@@ -44,6 +47,7 @@ public:
     }
 
 private: 
+    mutable std::mutex mutex_;
     std::vector<int> boundry_;
     std::vector<udp::endpoint> upstreams_;
     int weight_total_;

@@ -15,6 +15,7 @@ LINK_DIRECTORIES(
 SET(LINK_LIBRARIES
   stdc++
   boost_system
+  pthread
 )
 
 SET(SOURCE_CODE

@@ -14,7 +14,7 @@ Protocol::Protocol(
 }
 
 void Protocol::enStack(SharedBuffer shared_buffer) {
-    // std::cout << "Protocol::enStack" << std::endl;
+    std::lock_guard<std::mutex> guard(mutex_);
     SharedBufferInner sb = shared_buffer.buff;
     if (sb && sb->size() > 11) {
         std::string id = __getId(sb);
@@ -28,7 +28,7 @@ void Protocol::enStack(SharedBuffer shared_buffer) {
             cm->enStack(index, shared_buffer);
             if (cm->isFinish()) {
                 callback_(cm->getMessageAndRemoveTimer());
-                remove(id);
+                __remove(id);
             }
         } else {
             size_t index = __getIndex(sb);
@@ -47,6 +47,11 @@ void Protocol::enStack(SharedBuffer shared_buffer) {
 }
 
 void Protocol::remove(std::string id) {
+    std::lock_guard<std::mutex> guard(mutex_);
+    __remove(id);
+}
+
+void Protocol::__remove(std::string id) {
     chunked_map_.erase(id);
 }
 

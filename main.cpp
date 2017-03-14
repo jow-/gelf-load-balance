@@ -1,5 +1,6 @@
 #include <iostream>
 #include <functional>
+#include <stack>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>  
@@ -7,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include <boost/bind.hpp>
 #include <unordered_map>
+#include <thread>
 
 #include "define.h"
 #include "protocol.hpp"
@@ -17,6 +19,46 @@ using namespace boost::property_tree;
 
 namespace UdpAsyService  
 {  
+
+    class BufferPool {
+    public:
+        BufferPool() :size_(1000) {
+            resize(size_);
+        }
+
+        void resize(int n) {
+            for (int i=0; i<n; i++) {
+                SharedBufferInner sbi = SharedBufferInner(new Buffer());
+                stack_.push(sbi);
+            }
+        }
+
+        SharedBufferInner get() {
+            std::lock_guard<std::mutex> guard(mutex_);
+            if (stack_.empty()) {
+                resize(1000);
+            }
+
+            SharedBufferInner sbi = stack_.top();
+            stack_.pop();
+            return sbi;
+        }
+
+        void put(SharedBufferInner sbi) {
+            std::lock_guard<std::mutex> guard(mutex_);
+            stack_.push(sbi);
+        }
+
+    private:
+        std::stack<SharedBufferInner> stack_;
+        int size_;
+        mutable std::mutex mutex_;
+    };
+
+
+
+
+
     class udp_server  
     {  
     public:  
@@ -33,8 +75,9 @@ namespace UdpAsyService
   
         void start_recive()  
         {  
-            socket_.async_receive_from(boost::asio::buffer(rec_buf_), remot_endpoint_,  
-                boost::bind(&udp_server::hand_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));  
+            SharedBufferInner rec_buf = buffer_pool_.get();
+            socket_.async_receive_from(boost::asio::buffer(*rec_buf), remot_endpoint_,  
+                boost::bind(&udp_server::hand_receive, this, rec_buf, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));  
         }
 
         void hand_chunk(BufferStack buffer_stack) 
@@ -49,21 +92,19 @@ namespace UdpAsyService
         }
   
     private:  
-        void hand_receive(const boost::system::error_code& error, std::size_t size)  
+        void hand_receive(SharedBufferInner rec_buf, const boost::system::error_code& error, std::size_t size)  
         {  
             if (!error || error != boost::asio::error::message_size)  
             {
-                SharedBufferInner copy = SharedBufferInner(new Buffer());
-                boost::swap(rec_buf_, *copy);
-                if ((*copy)[0] == 0x78 || (*copy)[0] == 0x1f) {
+                if ((*rec_buf)[0] == 0x78 || (*rec_buf)[0] == 0x1f) {
                     udp::endpoint &up_endpoint = upstream_.get();
-                    socket_.async_send_to(boost::asio::buffer(*copy, size), up_endpoint,
-                        boost::bind(&udp_server::hand_send, this, copy, size, boost::asio::placeholders::error,
+                    socket_.async_send_to(boost::asio::buffer(*rec_buf, size), up_endpoint,
+                        boost::bind(&udp_server::hand_send, this, rec_buf, size, boost::asio::placeholders::error,
                             boost::asio::placeholders::bytes_transferred));  
-                } else if ((*copy)[0] == 0x1e) {
+                } else if ((*rec_buf)[0] == 0x1e) {
                     SharedBuffer sb;
                     sb.size = size;
-                    sb.buff = copy;
+                    sb.buff = rec_buf;
                     protocol_.enStack(sb);
                 }
             }
@@ -72,15 +113,16 @@ namespace UdpAsyService
 
         void hand_send(SharedBufferInner buff, size_t buff_len, const boost::system::system_error& error, std::size_t size)
         {  
-//            std::cout << "send byte: " << buff_len << std::endl;
+            buffer_pool_.put(buff);
+           // std::cout << "send byte: " << buff_len << std::endl;
         }  
   
     private:  
         udp::socket socket_;  
         udp::endpoint remot_endpoint_;
-        Buffer rec_buf_;
         Protocol protocol_;
         Upstream upstream_;
+        BufferPool buffer_pool_;
     };  
   
     void udp_asy_server(
@@ -91,8 +133,22 @@ namespace UdpAsyService
         {
             boost::asio::io_service io;  
             udp_server server(io, endpoint, config);  
-  
-            io.run();  
+
+            int thread = config.get_child("thread").get_value<int>();
+
+            std::vector<std::thread*> thread_group;
+
+            for (int i=0; i < thread; i++) {
+                std::thread *t = new std::thread([&](){
+                    io.run();
+                });
+                thread_group.push_back(t);
+            }
+
+            for (int i = 0; i < thread; ++i)
+            {
+                (thread_group[i])->join();
+            }
         }
         catch (std::exception& e)
         {

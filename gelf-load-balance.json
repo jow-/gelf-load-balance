@@ -1,6 +1,7 @@
 {
     "host": "127.0.0.1",
     "port": 12200,
+    "thread": 2,
     "chunked_timeout": 5,
     "upstream": [
         {
